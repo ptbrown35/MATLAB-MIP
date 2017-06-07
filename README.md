@@ -58,3 +58,4 @@ MATLAB controlled MIP
 
 ### Resources
 * Robotics Cape Installer: https://github.com/StrawsonDesign/Robotics_Cape_Installer/releases
+* Labview MIP: https://github.com/ktalke12/Labview-MiP
