@@ -8,6 +8,7 @@ classdef rc_cleanup_sys < matlab.System ...
     % Copyright 2016 The MathWorks, Inc.
 
     properties % block parameters
+        
     end
 
     methods
@@ -34,7 +35,7 @@ classdef rc_cleanup_sys < matlab.System ...
 
     end
 
-    methods (Access=protected)
+    methods (Access = protected)
         %% Define input properties
         function num = getNumInputsImpl(~)
             num = 0;
@@ -50,7 +51,7 @@ classdef rc_cleanup_sys < matlab.System ...
         end
     end
 
-    methods (Static, Access=protected)
+    methods (Static, Access = protected)
         function simMode = getSimulateUsingImpl(~)
             simMode = 'Interpreted execution';
         end

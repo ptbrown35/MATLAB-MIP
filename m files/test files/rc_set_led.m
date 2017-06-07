@@ -48,6 +48,10 @@ classdef rc_set_led < matlab.System ...
         function num = getNumOutputsImpl(~)
             num = 0;
         end
+        
+        function varargout = getInputNamesImpl(~)
+            varargout = 'u';
+        end
 
         function flag = isInputSizeLockedImpl(~,~)
             flag = true;

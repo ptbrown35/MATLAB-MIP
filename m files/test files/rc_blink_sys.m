@@ -27,7 +27,7 @@ classdef rc_blink_sys < matlab.System ...
             if coder.target('Rtw') % Generated Code: call external init code
                 coder.cinclude('roboticscape.h');
                 coder.ceval('rc_initialize');
-                disp('RC Cape initialized');
+                disp(['RC Cape initialized']);
             elseif coder.target('MATLAB') % Simulation: display valuesg
                disp(['MATLAB - Sim Initialized']);
                 %Don't do anything in Matlab interpretive mode
@@ -39,7 +39,7 @@ classdef rc_blink_sys < matlab.System ...
 
             if coder.target('Rtw') %  Generated Code: call external output code
                 coder.ceval('rc_set_led', obj.rc_led_t, u);
-                disp('Rtw - rc_set_led(rc_led_t led, int state)');
+                disp(['Rtw - rc_set_led(rc_led_t led, int state)']);
 
             elseif coder.target('MATLAB') % Simulation: display values
                 disp(['MATLAB - Step: Input = ' num2str(u)]);  %You could display u
@@ -51,7 +51,7 @@ classdef rc_blink_sys < matlab.System ...
         function releaseImpl(obj) % Termination code
              if coder.target('Rtw') %  Generated Code: call external output code
                 coder.ceval('rc_cleanup');
-                disp('Rtw - Cleaned up?');
+                disp(['Rtw - Cleaned up?']);
 
              elseif coder.target('MATLAB') % Simulaion: display values
                %Don't do anything in Matlab interpretive mode
@@ -61,12 +61,21 @@ classdef rc_blink_sys < matlab.System ...
 
     end
 
-    methods (Access=protected)
+    methods (Access = protected)
         %% Define input properties
         function num = getNumInputsImpl(~)
             num = 1;
         end
-
+        
+        function varargout = getInputNamesImpl(obj)
+            numInputs = getNumInputs(obj);
+            varargout = cell(1,numInputs);
+            varargout{1} = 'u';
+%             if numInputs > 1
+%                 varargout{2} = 'u2';
+%             end
+        end
+        
         function num = getNumOutputsImpl(~)
             num = 0;
         end
@@ -102,7 +111,7 @@ classdef rc_blink_sys < matlab.System ...
         end
     end
 
-    methods (Static, Access=protected)
+    methods (Static, Access = protected)
         function simMode = getSimulateUsingImpl(~)
             simMode = 'Interpreted execution';
         end
