@@ -55,3 +55,6 @@ MATLAB controlled MIP
 * rc_initialize_barometer
 * rc_read_barometer
 * rc_power_off_barometer
+
+### Resources
+* Robotics Cape Installer: https://github.com/StrawsonDesign/Robotics_Cape_Installer/releases
