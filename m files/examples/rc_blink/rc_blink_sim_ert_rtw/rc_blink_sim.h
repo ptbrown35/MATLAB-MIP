@@ -9,7 +9,7 @@
  *
  * Model version                  : 1.19
  * Simulink Coder version         : 8.12 (R2017a) 16-Feb-2017
- * C/C++ source code generated on : Mon Aug 14 21:54:00 2017
+ * C/C++ source code generated on : Sun Aug 20 19:41:28 2017
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: ARM Compatible->ARM Cortex

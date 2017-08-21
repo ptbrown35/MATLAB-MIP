@@ -2,7 +2,7 @@
 ## Makefile generated for Simulink model 'rc_blink_sim'. 
 ## 
 ## Makefile     : rc_blink_sim.mk
-## Generated on : Mon Aug 14 21:57:35 2017
+## Generated on : Sun Aug 20 19:31:04 2017
 ## MATLAB Coder version: 3.3 (R2017a)
 ## 
 ## Build Info:
