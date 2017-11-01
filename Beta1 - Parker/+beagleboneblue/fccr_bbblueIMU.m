@@ -26,10 +26,10 @@ classdef fccr_bbblueIMU < matlab.System ...
     
     methods
         % Constructor
-        function obj = bbblueIMU(varargin)
+        function obj = fccr_bblueIMU(varargin)
             %This would allow the code generation to proceed with the
             %p-files in the installed location of the support package.
-            coder.allowpcode('plain');            
+            coder.allowpcode('plain');
             % Support name-value pair arguments when constructing the object.
             setProperties(obj,nargin,varargin{:});
         end
@@ -37,12 +37,12 @@ classdef fccr_bbblueIMU < matlab.System ...
     end
     
     methods(Access = protected)
-        function setupImpl(~)
+        function setupImpl(obj)
             % Perform one-time calculations, such as computing constants
             if coder.target('Rtw')
                 coder.cinclude('MW_bbblue_driver.h');
                 coder.updateBuildInfo('addDefines','_roboticscape_in_use_');
-                coder.ceval('fccr_initialize_imu')
+                coder.ceval('fccr_initialize_imu');
             end
         end
         
@@ -50,12 +50,12 @@ classdef fccr_bbblueIMU < matlab.System ...
             % Implement algorithm. Calculate y as a function of input u and
             %  discrete states.
             
-            accel_x = 0;
-            accel_y = 0;
-            accel_z = 0;
-            gyro_x = 0;
-            gyro_y = 0;
-            gyro_z = 0;
+            accel_x = double(0);
+            accel_y = double(0);
+            accel_z = double(0);
+            gyro_x = double(0);
+            gyro_y = double(0);
+            gyro_z = double(0);
             
             if coder.target('Rtw')
                accel_x = coder.ceval('fccr_read_accel_x');
@@ -177,14 +177,14 @@ classdef fccr_bbblueIMU < matlab.System ...
                 % Update buildInfo
                 rootDir = fullfile(fileparts(mfilename('fullpath')),'.');
                 buildInfo.addIncludePaths(rootDir);
-               
                 
                 % Source Files
                 systemTargetFile = get_param(buildInfo.ModelName,'SystemTargetFile');
                 if isequal(systemTargetFile,'ert.tlc')
                     % Add the following when not in rapid-accel simulation
                     buildInfo.addLinkFlags('-lroboticscape');
-                    %addSourcePaths(buildInfo, fullfile(spkgRootDir, 'src'));
+                    addSourcePaths(buildInfo, fullfile(spkgRootDir, 'src'));
+                    addSourceFiles(buildInfo, 'fccr_imu.c', fullfile(spkgRootDir, 'src'), 'BlockModules');
                 end
                 
             end
