@@ -40,7 +40,7 @@ classdef fccr_bbblueIMU < matlab.System ...
         function setupImpl(obj)
             % Perform one-time calculations, such as computing constants
             if coder.target('Rtw')
-                coder.cinclude('MW_bbblue_driver.h');
+                coder.cinclude('fccr_bbblue_driver.h');
                 coder.updateBuildInfo('addDefines','_roboticscape_in_use_');
                 coder.ceval('fccr_initialize_imu');
             end
@@ -172,7 +172,7 @@ classdef fccr_bbblueIMU < matlab.System ...
                spkgRootDir = codertarget.raspi.internal.getSpPkgRootDir;
                 % Include Paths
                 addIncludePaths(buildInfo, fullfile(spkgRootDir, 'include'));
-                addIncludeFiles(buildInfo, 'MW_bbblue_driver.h');
+                addIncludeFiles(buildInfo, 'fccr_bbblue_driver.h');
                 
                 % Update buildInfo
                 rootDir = fullfile(fileparts(mfilename('fullpath')),'.');

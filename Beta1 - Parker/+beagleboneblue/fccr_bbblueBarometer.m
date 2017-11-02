@@ -1,17 +1,17 @@
-classdef bbblueBarometer < matlab.System ...
+classdef fccr_bbblueBarometer < matlab.System ...
         & matlab.system.mixin.internal.CustomIcon ...
         & matlab.system.mixin.Propagates ...
         &  matlabshared.svd.BlockSampleTime ...
         & coder.ExternalDependency
     
     % Beaglebone Blue Barometer
-    %
+    % We suggest using the highest oversampling possible for the rate at
+    % which you intend to sample the sensor. For example, if you want to
+    % sample and filter the data at 100hz, use 4x oversampling.
     
-    %#codegen
-    %#ok<*EMCA>
     properties(Nontunable)
-        oversample = 'x1';
-        filter = 'BMP_FILTER_16';
+        oversample = 'x1'; % oversample rate x1 with 182 Hz update rate
+        filter = 'BMP_FILTER_16'; % smoothest filter coefficient
     end
     
     properties(Constant, Hidden)
@@ -30,7 +30,7 @@ classdef bbblueBarometer < matlab.System ...
         function obj = bbblueBarometer(varargin)
             %This would allow the code generation to proceed with the
             %p-files in the installed location of the support package.
-            coder.allowpcode('plain');            
+            coder.allowpcode('plain');
             % Support name-value pair arguments when constructing the object.
             setProperties(obj,nargin,varargin{:});
         end
@@ -38,19 +38,19 @@ classdef bbblueBarometer < matlab.System ...
         function oversampleVal = get.oversampleEnum(obj)
             switch(obj.oversample)
                 case 'x1'
-                    oversampleVal = uint8(1);
+                    oversampleVal = uint8(1); % update rate 182 HZ
                 case 'x2'
-                    oversampleVal = uint8(2);
+                    oversampleVal = uint8(2); % update rate 133 HZ
                 case 'x4'
-                    oversampleVal = uint8(3);
+                    oversampleVal = uint8(3); % update rate 87 HZ
                 case 'x8'
-                    oversampleVal = uint8(4);
+                    oversampleVal = uint8(4); % update rate 51 HZ
                 case 'x16'
-                    oversampleVal = uint8(5);
+                    oversampleVal = uint8(5); % update rate 28 HZ
             end
         end
         
-        function filterVal = get.filterEnum(obj)
+        function filterVal = get.filterEnum(obj) % first order filter coefficient
             switch(obj.filter)
                 case 'BMP_FILTER_OFF'
                     filterVal = uint8(0);
@@ -71,7 +71,7 @@ classdef bbblueBarometer < matlab.System ...
         function setupImpl(obj)
             % Perform one-time calculations, such as computing constants
             if coder.target('Rtw')
-                coder.cinclude('MW_bbblue_driver.h');
+                coder.cinclude('fccr_bbblue_driver.h');
                 coder.updateBuildInfo('addDefines','_roboticscape_in_use_');
                 coder.ceval('rc_initialize_barometer', obj.oversampleEnum, obj.filterEnum)
             end
@@ -83,11 +83,11 @@ classdef bbblueBarometer < matlab.System ...
             temp = double(0);
             pres = double(0);
             alt  = double(0);
-            if coder.target('Rtw')                
-                   coder.ceval('rc_read_barometer');
-                   temp = coder.ceval('rc_bmp_get_temperature');
-                   pres = coder.ceval('rc_bmp_get_pressure_pa');
-                   alt  = coder.ceval('rc_bmp_get_altitude_m');                   
+            if coder.target('Rtw')
+                coder.ceval('rc_read_barometer');
+                temp = coder.ceval('rc_bmp_get_temperature');
+                pres = coder.ceval('rc_bmp_get_pressure_pa');
+                alt  = coder.ceval('rc_bmp_get_altitude_m');
             end
         end
         
@@ -99,11 +99,8 @@ classdef bbblueBarometer < matlab.System ...
         end
         
         function num = getNumInputsImpl(~)
-            % Define total number of inputs for system with optional inputs
+            % Define total number of inputs for system
             num = 0;
-            % if obj.UseOptionalInput
-            %     num = 2;
-            % end
         end
         
         function num = getNumOutputsImpl(~)
@@ -111,7 +108,7 @@ classdef bbblueBarometer < matlab.System ...
             % outputs
             num = 3;
         end
-
+        
         function varargout = getOutputNamesImpl(~)
             % Return output port names for System block
             varargout{1} = 'Temp';
@@ -150,22 +147,27 @@ classdef bbblueBarometer < matlab.System ...
         function st = getSampleTimeImpl(obj)
             st = obj.SampleTime;
         end
-
+        
         function maskDisplayCmds = getMaskDisplayImpl(obj)
+            Oversample = ['Oversample : ' obj.oversample];
+            Filter = ['Filter Coefficient : ' obj.filter];
             blockName = 'Barometer';
             maskDisplayCmds = [ ...
                 ['color(''white'');',newline]...
                 ['plot([100,100,100,100]*1,[100,100,100,100]*1);',newline]...
-                ['plot([100,100,100,100]*0,[100,100,100,100]*0);',newline]...                
+                ['plot([100,100,100,100]*0,[100,100,100,100]*0);',newline]...
                 ['color(''blue'');',newline] ...
                 ['text(100, 92, '' ' obj.blockPlatform ' '', ''horizontalAlignment'', ''right'');',newline]  ...
+                ['color(''black'');',newline]...
+                ['text(52,32,' [''' ' Oversample ''',''horizontalAlignment'',''center'');' newline]]   ...
+                ['color(''black'');',newline]...
+                ['text(52,12,' [''' ' Filter ''',''horizontalAlignment'',''center'');' newline]]   ...
                 ['color(''black'');',newline]...
                 ['text(52,52,' [''' ' blockName ''',''horizontalAlignment'',''center'');' newline]]   ...
                 ['color(''black'');',newline]...
                 ];
         end
-        
-    end %methods
+    end
     
     methods (Static)
         function name = getDescriptiveName()
@@ -178,15 +180,14 @@ classdef bbblueBarometer < matlab.System ...
         
         function updateBuildInfo(buildInfo, context)
             if context.isCodeGenTarget('rtw')
-               spkgRootDir = codertarget.raspi.internal.getSpPkgRootDir;
+                spkgRootDir = codertarget.raspi.internal.getSpPkgRootDir;
                 % Include Paths
                 addIncludePaths(buildInfo, fullfile(spkgRootDir, 'include'));
-                addIncludeFiles(buildInfo, 'MW_bbblue_driver.h');
+                addIncludeFiles(buildInfo, 'fccr_bbblue_driver.h');
                 
                 % Update buildInfo
                 rootDir = fullfile(fileparts(mfilename('fullpath')),'.');
                 buildInfo.addIncludePaths(rootDir);
-               
                 
                 % Source Files
                 systemTargetFile = get_param(buildInfo.ModelName,'SystemTargetFile');
@@ -195,7 +196,6 @@ classdef bbblueBarometer < matlab.System ...
                     buildInfo.addLinkFlags('-lroboticscape');
                     %addSourcePaths(buildInfo, fullfile(spkgRootDir, 'src'));
                 end
-                
             end
         end
     end %methods
@@ -207,9 +207,11 @@ classdef bbblueBarometer < matlab.System ...
         
         function header = getHeaderImpl
             % Define header panel for System block dialog
-               header = matlab.system.display.Header(mfilename('class'), ...
+            header = matlab.system.display.Header(mfilename('class'), ...
                 'Title', 'Barometer', ...
-                'Text',['Output Temperature, Pressure, and Altitude from Barometer.'], ...
+                'Text',['Output Temperature, Pressure, and Altitude from the Barometer.' newline newline ...
+                'Use the oversample drop down to set the oversample rate.' newline ...
+                'Use the filter dropdown to set the internal first order filter coefficient or select off to apply your own filtering.'], ...
                 'ShowSourceLink', false);
         end
         
@@ -222,14 +224,13 @@ classdef bbblueBarometer < matlab.System ...
             % Sample Time
             Sampletime = matlab.system.display.internal.Property('SampleTime', 'Description', 'Sample time');
             
-          
+            
             PropertyListOut = {Oversample, Filter, Sampletime};
             % Create mask display
             Group = matlab.system.display.Section(...
                 'PropertyList',PropertyListOut);
             
             groups = Group;
-            
         end
         
         function flag = showSimulateUsingImpl
@@ -238,3 +239,4 @@ classdef bbblueBarometer < matlab.System ...
         end
     end
 end
+
