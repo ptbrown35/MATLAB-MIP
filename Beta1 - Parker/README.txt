@@ -1,5 +1,16 @@
 README.TXT
 
+Parker Brown Updates - 11/05/2017
+
+* Created fccr_bbblue_driver.h to keep all of the edits I make seperate from the Mathworks bbblue driver. It includes all of the necessary roboticscape functions and wrappers for use with the Barometer and IMU blocks.
+* Reset MW_bblue_driver.h to the original source provided to me.
+* Updated fccr_bbblueBarometer.m Block Mask Icon and Block Mask Description.
+* Updated fccr_bbblueIMU.m to use the fccr_imu.c c wrapper to output raw random read mode accelerometer and gryroscope data.
+	- fccr_imu.c handles IMU initialization and power down
+	- fccr_imu.c handles the c struct pointer and passes Simulink floats for data. This is for initial usage, I will be upgrading and making the c wrapper more fool proof in the future.
+* Test models are included for fccr_bbblueBarometer.m and fccr_bbblueIMU.m blocks.
+* A work-in-progress balancing model, fccr_balance.slx, is provided as well. Balancing is outlined and digital filtering of hte raw data is started.
+
 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 Parker Brown Updates
 
@@ -8,7 +19,7 @@ Parker Brown Updates
 * Developing bbblueIMU.m, bbblueIMU_no_obj.m, and bbblueIMU_obj.m to attempt to get accelerometer and gyroscope data from the bbblue. None of them compile successfully and this is where I could use the help.
 	- bbblueIMU.m has parts of bbblueIMU_no_obj.m and bbblueIMU_obj.m combined and is my working copy.
 	- bbblueIMU_no_obj.m attempts to create the conf and data stucts as local to setupImpl
-	-  bbblueIMU_obj.m attempts to create the conf and data stucts within setupImpl as properties of the class (obj)
+	- bbblueIMU_obj.m attempts to create the conf and data stucts within setupImpl as properties of the class (obj)
 * Developing fccr_bbblueIMU.m as an attempt to keep the c structs within a c wrapper (fccr_imu.c) and only pass simple data types to/from Simulink
 	- fccr_imu.c is still under development and wil not compile yet
 * baro_test.slx and imu_test.slx are example models for the Barometer and IMU blocks
