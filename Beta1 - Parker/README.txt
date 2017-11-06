@@ -2,14 +2,14 @@ README.TXT
 
 Parker Brown Updates - 11/05/2017
 
-* Created fccr_bbblue_driver.h to keep all of the edits I make seperate from the Mathworks bbblue driver. It includes all of the necessary roboticscape functions and wrappers for use with the Barometer and IMU blocks.
+* Created fccr_bbblue_driver.h to keep all of the edits I make seperate from MW_bbblue_driver.h. It includes all of the necessary roboticscape functions and wrappers for use with the Barometer and IMU blocks.
 * Reset MW_bblue_driver.h to the original source provided to me.
 * Updated fccr_bbblueBarometer.m Block Mask Icon and Block Mask Description.
 * Updated fccr_bbblueIMU.m to use the fccr_imu.c c wrapper to output raw random read mode accelerometer and gryroscope data.
-	- fccr_imu.c handles IMU initialization and power down
-	- fccr_imu.c handles the c struct pointer and passes Simulink floats for data. This is for initial usage, I will be upgrading and making the c wrapper more fool proof in the future.
+	- fccr_imu.c handles IMU initialization and power down.
+	- fccr_imu.c handles the c struct data types and passes Simulink floats for data returned. This is for initial usage, I will be upgrading and making the c wrapper more fool proof in the future.
 * Test models are included for fccr_bbblueBarometer.m and fccr_bbblueIMU.m blocks.
-* A work-in-progress balancing model, fccr_balance.slx, is provided as well. Balancing is outlined and digital filtering of hte raw data is started.
+* A work-in-progress balancing model, fccr_balance.slx, is provided as well. Balancing is outlined and digital filtering of the raw data is started.
 
 . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 Parker Brown Updates
