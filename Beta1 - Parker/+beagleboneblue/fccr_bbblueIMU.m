@@ -172,6 +172,7 @@ classdef fccr_bbblueIMU < matlab.System ...
                spkgRootDir = codertarget.raspi.internal.getSpPkgRootDir;
                 % Include Paths
                 addIncludePaths(buildInfo, fullfile(spkgRootDir, 'include'));
+                addIncludeFiles(buildInfo, 'MW_bbblue_driver.h');
                 addIncludeFiles(buildInfo, 'fccr_bbblue_driver.h');
                 
                 % Update buildInfo

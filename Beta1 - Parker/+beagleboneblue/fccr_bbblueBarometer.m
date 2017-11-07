@@ -9,6 +9,9 @@ classdef fccr_bbblueBarometer < matlab.System ...
     % which you intend to sample the sensor. For example, if you want to
     % sample and filter the data at 100hz, use 4x oversampling.
     
+    %#codegen
+    %#ok<*EMCA>
+    
     properties(Nontunable)
         oversample = 'x1'; % oversample rate x1 with 182 Hz update rate
         filter = 'BMP_FILTER_16'; % smoothest filter coefficient
@@ -183,6 +186,7 @@ classdef fccr_bbblueBarometer < matlab.System ...
                 spkgRootDir = codertarget.raspi.internal.getSpPkgRootDir;
                 % Include Paths
                 addIncludePaths(buildInfo, fullfile(spkgRootDir, 'include'));
+                addIncludeFiles(buildInfo, 'MW_bbblue_driver.h');
                 addIncludeFiles(buildInfo, 'fccr_bbblue_driver.h');
                 
                 % Update buildInfo
