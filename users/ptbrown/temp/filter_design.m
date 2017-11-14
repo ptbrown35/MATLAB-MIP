@@ -1,11 +1,15 @@
-%% fitler design stuff
+clear
+clc
 
-fs = 200;
-fc = fs/2;
-wc = 2*pi*fc;
+syms z
 
-Fs = tf([0 wc], [1 wc])
-bode(Fs)
+h = 0.01;
+t = 1;
 
-Ts = 1/200;
-Fz = c2d(Fs, Ts, 'tustin')
+s = (2*z - 1)/(h*z + 1);
+
+LP = 1 / (t*s + 1);
+HP = t*s/(t*s + 1);
+
+LP = simplify(LP)
+HP = simplify(HP)
