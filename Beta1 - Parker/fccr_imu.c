@@ -25,12 +25,12 @@ float fccr_read_accel_x(){
 }
 
 float fccr_read_accel_y(){
-	rc_read_accel_data(&data);
+	//rc_read_accel_data(&data);
 	return data.accel[1];
 }
 
 float fccr_read_accel_z(){
-	rc_read_accel_data(&data);
+	//rc_read_accel_data(&data);
 	return data.accel[2];
 }
 
@@ -40,11 +40,11 @@ float fccr_read_gyro_x(){
 }
 
 float fccr_read_gyro_y(){
-	rc_read_gyro_data(&data);
+	//rc_read_gyro_data(&data);
 	return data.gyro[1];
 }
 
 float fccr_read_gyro_z(){
-	rc_read_gyro_data(&data);
+	//rc_read_gyro_data(&data);
 	return data.gyro[2];
 }
