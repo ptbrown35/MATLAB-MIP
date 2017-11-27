@@ -1,78 +1,58 @@
-classdef fccr_bbblueIMU < matlab.System ...
-        & matlab.system.mixin.internal.CustomIcon ...
-        & matlab.system.mixin.Propagates ...
-        & matlabshared.svd.BlockSampleTime ...
-        & coder.ExternalDependency
+classdef bbblueButton < matlab.System ...
+        &  matlab.system.mixin.internal.CustomIcon & matlab.system.mixin.Propagates...
+        &  matlabshared.svd.BlockSampleTime & coder.ExternalDependency
     
-    % Beaglebone Blue IMU
-    %
-    % This template includes the minimum set of functions required
-    % to define a System object with discrete state.
     
     %#codegen
     %#ok<*EMCA>
-    
     properties(Nontunable)
-        
+        %Button
+        Button = 'Mode'      
     end
     
     properties(Constant, Hidden)
+        ButtonSet = matlab.system.StringSet({'Mode','Pause'})
         blockPlatform = 'BB BLUE'
     end
     
-    properties(Hidden)
-        
-    end
     
     methods
         % Constructor
-        function obj = fccr_bblueIMU(varargin)
+        function obj = bbblueButton(varargin)
             %This would allow the code generation to proceed with the
             %p-files in the installed location of the support package.
-            coder.allowpcode('plain');
+            coder.allowpcode('plain');            
             % Support name-value pair arguments when constructing the object.
             setProperties(obj,nargin,varargin{:});
         end
         
+        
     end
     
     methods(Access = protected)
-        function setupImpl(obj)
+        function setupImpl(~)
             % Perform one-time calculations, such as computing constants
             if coder.target('Rtw')
-                coder.cinclude('fccr_bbblue_driver.h');
+                coder.cinclude('MW_bbblue_driver.h');      
                 coder.updateBuildInfo('addDefines','_roboticscape_in_use_');
-                coder.ceval('fccr_initialize_imu');
             end
         end
         
-        function [accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z] = stepImpl(~)
+        
+        
+        function data = stepImpl(obj)
             % Implement algorithm. Calculate y as a function of input u and
             %  discrete states.
-            
-            accel_x = double(0);
-            accel_y = double(0);
-            accel_z = double(0);
-            gyro_x = double(0);
-            gyro_y = double(0);
-            gyro_z = double(0);
-            
+            data = uint8(0);
             if coder.target('Rtw')
-               accel_x = coder.ceval('fccr_read_accel_x');
-               accel_y = coder.ceval('fccr_read_accel_y');
-               accel_z = coder.ceval('fccr_read_accel_z');
-               gyro_x = coder.ceval('fccr_read_gyro_x');
-               gyro_y = coder.ceval('fccr_read_gyro_y');
-               gyro_z = coder.ceval('fccr_read_gyro_z');
+                if isequal(obj.Button,'Mode')
+                    data=coder.ceval('rc_get_mode_button');
+                else
+                    data=coder.ceval('rc_get_pause_button');
+                end
             end
         end
         
-        function releaseImpl(~)
-            % Release resources, such as file handles
-            if coder.target('Rtw')
-                coder.ceval('rc_power_off_imu'); % Power down IMU at end of simulation
-            end
-        end
         
         function num = getNumInputsImpl(~)
             % Define total number of inputs for system with optional inputs
@@ -85,82 +65,62 @@ classdef fccr_bbblueIMU < matlab.System ...
         function num = getNumOutputsImpl(~)
             % Define total number of outputs for system with optional
             % outputs
-            num = 6;
+            num = 1;
         end
-
+        
         function varargout = getOutputNamesImpl(~)
             % Return output port names for System block
-            varargout{1} = 'Accel_x';
-            varargout{2} = 'Accel_y';
-            varargout{3} = 'Accel_z';
-            varargout{4} = 'Gyro_x';
-            varargout{5} = 'Gyro_y';
-            varargout{6} = 'Gyro_z';
+            varargout{1} ='state';
         end
-        
+        %
         function varargout = getOutputSizeImpl(~)
             % Return size for each output port
-            varargout{1} = [1 1];
-            varargout{2} = [1 1];
-            varargout{3} = [1 1];
-            varargout{4} = [1 1];
-            varargout{5} = [1 1];
-            varargout{6} = [1 1];
+            varargout{1} =[1 1];
         end
-        
+        %
         function varargout = getOutputDataTypeImpl(~)
             % Return data type for each output port
-            varargout{1} = 'double';
-            varargout{2} = 'double';
-            varargout{3} = 'double';
-            varargout{4} = 'double';
-            varargout{5} = 'double';
-            varargout{6} = 'double';
+            varargout{1} ='uint8';
         end
-        
+        %
         function varargout = isOutputComplexImpl(~)
             % Return true for each output port with complex data
-            varargout{1} = false;
-            varargout{2} = false;
-            varargout{3} = false;
-            varargout{4} = false;
-            varargout{5} = false;
-            varargout{6} = false;
+            varargout{1} =false;
         end
-        
+        %
         function varargout = isOutputFixedSizeImpl(~)
             % Return true for each output port with fixed size
-            varargout{1} = true;
-            varargout{2} = true;
-            varargout{3} = true;
-            varargout{4} = true;
-            varargout{5} = true;
-            varargout{6} = true;
+            varargout{1} =true;
         end
         
         function st = getSampleTimeImpl(obj)
             st = obj.SampleTime;
         end
-
+        
         function maskDisplayCmds = getMaskDisplayImpl(obj)
-            blockName = 'IMU';
+            blockName = 'Button';
             maskDisplayCmds = [ ...
                 ['color(''white'');',newline]...
                 ['plot([100,100,100,100]*1,[100,100,100,100]*1);',newline]...
-                ['plot([100,100,100,100]*0,[100,100,100,100]*0);',newline]...                
+                ['plot([100,100,100,100]*0,[100,100,100,100]*0);',newline]...
                 ['color(''blue'');',newline] ...
                 ['text(100, 92, '' ' obj.blockPlatform ' '', ''horizontalAlignment'', ''right'');',newline]  ...
+                ['color(''black'');',newline]...
+                ['text(52,12,' [''' ' obj.Button ''',''horizontalAlignment'',''center'');' newline]]   ...
                 ['color(''black'');',newline]...
                 ['text(52,52,' [''' ' blockName ''',''horizontalAlignment'',''center'');' newline]]   ...
                 ['color(''black'');',newline]...
                 ];
+            
         end
+        
+        
         
     end %methods
     
     methods (Static)
         function name = getDescriptiveName()
-            name = 'BeagleBone Blue IMU';
+            name = 'BeagleBone Blue Button';
         end
         
         function b = isSupportedContext(context)
@@ -169,23 +129,15 @@ classdef fccr_bbblueIMU < matlab.System ...
         
         function updateBuildInfo(buildInfo, context)
             if context.isCodeGenTarget('rtw')
-               spkgRootDir = codertarget.bbblue.internal.getSpPkgRootDir;
-                % Include Paths
-                addIncludePaths(buildInfo, fullfile(spkgRootDir, 'include'));
-                addIncludeFiles(buildInfo, 'MW_bbblue_driver.h');
-                addIncludeFiles(buildInfo, 'fccr_bbblue_driver.h');
                 
                 % Update buildInfo
                 rootDir = fullfile(fileparts(mfilename('fullpath')),'.');
                 buildInfo.addIncludePaths(rootDir);
                 
-                % Source Files
                 systemTargetFile = get_param(buildInfo.ModelName,'SystemTargetFile');
                 if isequal(systemTargetFile,'ert.tlc')
                     % Add the following when not in rapid-accel simulation
                     buildInfo.addLinkFlags('-lroboticscape');
-                    addSourcePaths(buildInfo, fullfile(spkgRootDir, 'src'));
-                    addSourceFiles(buildInfo, 'fccr_imu.c', fullfile(spkgRootDir, 'src'), 'BlockModules');
                 end
                 
             end
@@ -193,30 +145,30 @@ classdef fccr_bbblueIMU < matlab.System ...
     end %methods
     
     methods(Access = protected, Static)
-        function simMode = getSimulateUsingImpl(~)
-            simMode = 'Interpreted execution';
-        end
-        
         function header = getHeaderImpl
             % Define header panel for System block dialog
                header = matlab.system.display.Header(mfilename('class'), ...
-                'Title', 'IMU', ...
-                'Text',['Output Accelerometer and Gyroscope data.'], ...
+                'Title', 'Button', ...
+                'Text',['Read the state of the Button on BeagleBone Blue hardware.' newline newline ...
+                'The block outputs the state of the Button as a uint8 data.' newline newline 'The output is 1 when the button is pressed and 0 when released.'], ...
                 'ShowSourceLink', false);
         end
         
-        function groups = getPropertyGroupsImpl
+        function groups = getPropertyGroupsImpl            
+            % Button
+            Button = matlab.system.display.internal.Property('Button', 'Description', 'Button');
             % Sample Time
             Sampletime = matlab.system.display.internal.Property('SampleTime', 'Description', 'Sample time');
             
-            PropertyListOut = {Sampletime};
+          
+            PropertyListOut = {Button, Sampletime};
             % Create mask display
             Group = matlab.system.display.Section(...
                 'PropertyList',PropertyListOut);
             
             groups = Group;
             
-        end
+        end       
         
         function flag = showSimulateUsingImpl
             % Return false if simulation mode hidden in System block dialog

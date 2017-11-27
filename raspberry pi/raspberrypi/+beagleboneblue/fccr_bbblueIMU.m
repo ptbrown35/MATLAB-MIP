@@ -1,71 +1,37 @@
-classdef fccr_bbblueBarometer < matlab.System ...
+classdef fccr_bbblueIMU < matlab.System ...
         & matlab.system.mixin.internal.CustomIcon ...
         & matlab.system.mixin.Propagates ...
-        &  matlabshared.svd.BlockSampleTime ...
+        & matlabshared.svd.BlockSampleTime ...
         & coder.ExternalDependency
     
-    % Beaglebone Blue Barometer
-    % We suggest using the highest oversampling possible for the rate at
-    % which you intend to sample the sensor. For example, if you want to
-    % sample and filter the data at 100hz, use 4x oversampling.
+    % Beaglebone Blue IMU
+    %
+    % This template includes the minimum set of functions required
+    % to define a System object with discrete state.
     
     %#codegen
     %#ok<*EMCA>
     
     properties(Nontunable)
-        oversample = 'x1'; % oversample rate x1 with 182 Hz update rate
-        filter = 'BMP_FILTER_16'; % smoothest filter coefficient
+        
     end
     
     properties(Constant, Hidden)
-        oversampleSet = matlab.system.StringSet({'x1','x2','x4','x8','x16'})
-        filterSet = matlab.system.StringSet({'BMP_FILTER_OFF','BMP_FILTER_2','BMP_FILTER_4','BMP_FILTER_8','BMP_FILTER_16'})
         blockPlatform = 'BB BLUE'
     end
     
     properties(Hidden)
-        oversampleEnum
-        filterEnum
+        
     end
     
     methods
         % Constructor
-        function obj = bbblueBarometer(varargin)
+        function obj = fccr_bblueIMU(varargin)
             %This would allow the code generation to proceed with the
             %p-files in the installed location of the support package.
             coder.allowpcode('plain');
             % Support name-value pair arguments when constructing the object.
             setProperties(obj,nargin,varargin{:});
-        end
-        
-        function oversampleVal = get.oversampleEnum(obj)
-            switch(obj.oversample)
-                case 'x1'
-                    oversampleVal = uint8(1); % update rate 182 HZ
-                case 'x2'
-                    oversampleVal = uint8(2); % update rate 133 HZ
-                case 'x4'
-                    oversampleVal = uint8(3); % update rate 87 HZ
-                case 'x8'
-                    oversampleVal = uint8(4); % update rate 51 HZ
-                case 'x16'
-                    oversampleVal = uint8(5); % update rate 28 HZ
-            end
-        end
-        
-        function filterVal = get.filterEnum(obj) % first order filter coefficient
-            switch(obj.filter)
-                case 'BMP_FILTER_OFF'
-                    filterVal = uint8(0);
-                case 'BMP_FILTER_2'
-                    filterVal = uint8(1);
-                case 'BMP_FILTER_4'
-                    filterVal = uint8(2);
-                case 'BMP_FILTER_8'
-                    filterVal = uint8(3);
-                case 'BMP_FILTER_16'
-                    filterVal = uint8(4);
-            end
         end
         
     end
@@ -76,47 +42,60 @@ classdef fccr_bbblueBarometer < matlab.System ...
             if coder.target('Rtw')
                 coder.cinclude('fccr_bbblue_driver.h');
                 coder.updateBuildInfo('addDefines','_roboticscape_in_use_');
-                coder.ceval('rc_initialize_barometer', obj.oversampleEnum, obj.filterEnum)
+                coder.ceval('fccr_initialize_imu');
             end
         end
         
-        function [temp, pres, alt] = stepImpl(~)
+        function [accel_x, accel_y, accel_z, gyro_x, gyro_y, gyro_z] = stepImpl(~)
             % Implement algorithm. Calculate y as a function of input u and
             %  discrete states.
-            temp = double(0);
-            pres = double(0);
-            alt  = double(0);
+            
+            accel_x = double(0);
+            accel_y = double(0);
+            accel_z = double(0);
+            gyro_x = double(0);
+            gyro_y = double(0);
+            gyro_z = double(0);
+            
             if coder.target('Rtw')
-                coder.ceval('rc_read_barometer');
-                temp = coder.ceval('rc_bmp_get_temperature');
-                pres = coder.ceval('rc_bmp_get_pressure_pa');
-                alt  = coder.ceval('rc_bmp_get_altitude_m');
+               accel_x = coder.ceval('fccr_read_accel_x');
+               accel_y = coder.ceval('fccr_read_accel_y');
+               accel_z = coder.ceval('fccr_read_accel_z');
+               gyro_x = coder.ceval('fccr_read_gyro_x');
+               gyro_y = coder.ceval('fccr_read_gyro_y');
+               gyro_z = coder.ceval('fccr_read_gyro_z');
             end
         end
         
         function releaseImpl(~)
             % Release resources, such as file handles
             if coder.target('Rtw')
-                coder.ceval('rc_power_off_barometer');
+                coder.ceval('rc_power_off_imu'); % Power down IMU at end of simulation
             end
         end
         
         function num = getNumInputsImpl(~)
-            % Define total number of inputs for system
+            % Define total number of inputs for system with optional inputs
             num = 0;
+            % if obj.UseOptionalInput
+            %     num = 2;
+            % end
         end
         
         function num = getNumOutputsImpl(~)
             % Define total number of outputs for system with optional
             % outputs
-            num = 3;
+            num = 6;
         end
-        
+
         function varargout = getOutputNamesImpl(~)
             % Return output port names for System block
-            varargout{1} = 'Temp';
-            varargout{2} = 'Pres';
-            varargout{3} = 'Alt';
+            varargout{1} = 'Accel_x';
+            varargout{2} = 'Accel_y';
+            varargout{3} = 'Accel_z';
+            varargout{4} = 'Gyro_x';
+            varargout{5} = 'Gyro_y';
+            varargout{6} = 'Gyro_z';
         end
         
         function varargout = getOutputSizeImpl(~)
@@ -124,6 +103,9 @@ classdef fccr_bbblueBarometer < matlab.System ...
             varargout{1} = [1 1];
             varargout{2} = [1 1];
             varargout{3} = [1 1];
+            varargout{4} = [1 1];
+            varargout{5} = [1 1];
+            varargout{6} = [1 1];
         end
         
         function varargout = getOutputDataTypeImpl(~)
@@ -131,6 +113,9 @@ classdef fccr_bbblueBarometer < matlab.System ...
             varargout{1} = 'double';
             varargout{2} = 'double';
             varargout{3} = 'double';
+            varargout{4} = 'double';
+            varargout{5} = 'double';
+            varargout{6} = 'double';
         end
         
         function varargout = isOutputComplexImpl(~)
@@ -138,6 +123,9 @@ classdef fccr_bbblueBarometer < matlab.System ...
             varargout{1} = false;
             varargout{2} = false;
             varargout{3} = false;
+            varargout{4} = false;
+            varargout{5} = false;
+            varargout{6} = false;
         end
         
         function varargout = isOutputFixedSizeImpl(~)
@@ -145,36 +133,34 @@ classdef fccr_bbblueBarometer < matlab.System ...
             varargout{1} = true;
             varargout{2} = true;
             varargout{3} = true;
+            varargout{4} = true;
+            varargout{5} = true;
+            varargout{6} = true;
         end
         
         function st = getSampleTimeImpl(obj)
             st = obj.SampleTime;
         end
-        
+
         function maskDisplayCmds = getMaskDisplayImpl(obj)
-            Oversample = ['Oversample : ' obj.oversample];
-            Filter = ['Filter Coefficient : ' obj.filter];
-            blockName = 'Barometer';
+            blockName = 'IMU';
             maskDisplayCmds = [ ...
                 ['color(''white'');',newline]...
                 ['plot([100,100,100,100]*1,[100,100,100,100]*1);',newline]...
-                ['plot([100,100,100,100]*0,[100,100,100,100]*0);',newline]...
+                ['plot([100,100,100,100]*0,[100,100,100,100]*0);',newline]...                
                 ['color(''blue'');',newline] ...
                 ['text(100, 92, '' ' obj.blockPlatform ' '', ''horizontalAlignment'', ''right'');',newline]  ...
-                ['color(''black'');',newline]...
-                ['text(52,32,' [''' ' Oversample ''',''horizontalAlignment'',''center'');' newline]]   ...
-                ['color(''black'');',newline]...
-                ['text(52,12,' [''' ' Filter ''',''horizontalAlignment'',''center'');' newline]]   ...
                 ['color(''black'');',newline]...
                 ['text(52,52,' [''' ' blockName ''',''horizontalAlignment'',''center'');' newline]]   ...
                 ['color(''black'');',newline]...
                 ];
         end
-    end
+        
+    end %methods
     
     methods (Static)
         function name = getDescriptiveName()
-            name = 'BeagleBone Blue Barometer';
+            name = 'BeagleBone Blue IMU';
         end
         
         function b = isSupportedContext(context)
@@ -183,10 +169,9 @@ classdef fccr_bbblueBarometer < matlab.System ...
         
         function updateBuildInfo(buildInfo, context)
             if context.isCodeGenTarget('rtw')
-                spkgRootDir = codertarget.bbblue.internal.getSpPkgRootDir;
+               spkgRootDir = codertarget.raspi.internal.getSpPkgRootDir;
                 % Include Paths
                 addIncludePaths(buildInfo, fullfile(spkgRootDir, 'include'));
-                addIncludeFiles(buildInfo, 'MW_bbblue_driver.h');
                 addIncludeFiles(buildInfo, 'fccr_bbblue_driver.h');
                 
                 % Update buildInfo
@@ -198,8 +183,10 @@ classdef fccr_bbblueBarometer < matlab.System ...
                 if isequal(systemTargetFile,'ert.tlc')
                     % Add the following when not in rapid-accel simulation
                     buildInfo.addLinkFlags('-lroboticscape');
-                    %addSourcePaths(buildInfo, fullfile(spkgRootDir, 'src'));
+                    addSourcePaths(buildInfo, fullfile(spkgRootDir, 'src'));
+                    addSourceFiles(buildInfo, 'fccr_imu.c', fullfile(spkgRootDir, 'src'), 'BlockModules');
                 end
+                
             end
         end
     end %methods
@@ -211,30 +198,23 @@ classdef fccr_bbblueBarometer < matlab.System ...
         
         function header = getHeaderImpl
             % Define header panel for System block dialog
-            header = matlab.system.display.Header(mfilename('class'), ...
-                'Title', 'Barometer', ...
-                'Text',['Output Temperature, Pressure, and Altitude from the Barometer.' newline newline ...
-                'Use the oversample drop down to set the oversample rate.' newline ...
-                'Use the filter dropdown to set the internal first order filter coefficient or select off to apply your own filtering.'], ...
+               header = matlab.system.display.Header(mfilename('class'), ...
+                'Title', 'IMU', ...
+                'Text',['Output Accelerometer and Gyroscope data.'], ...
                 'ShowSourceLink', false);
         end
         
         function groups = getPropertyGroupsImpl
-            % Oversample
-            Oversample = matlab.system.display.internal.Property('oversample', 'Description', 'Oversample');
-            % Filter
-            Filter = matlab.system.display.internal.Property('filter', 'Description', 'Filter');
-            
             % Sample Time
             Sampletime = matlab.system.display.internal.Property('SampleTime', 'Description', 'Sample time');
             
-            
-            PropertyListOut = {Oversample, Filter, Sampletime};
+            PropertyListOut = {Sampletime};
             % Create mask display
             Group = matlab.system.display.Section(...
                 'PropertyList',PropertyListOut);
             
             groups = Group;
+            
         end
         
         function flag = showSimulateUsingImpl
@@ -243,4 +223,3 @@ classdef fccr_bbblueBarometer < matlab.System ...
         end
     end
 end
-
