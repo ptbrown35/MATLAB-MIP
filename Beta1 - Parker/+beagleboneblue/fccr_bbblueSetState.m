@@ -1,36 +1,29 @@
-classdef fccr_bbblueBarometer < matlab.System ...
+classdef fccr_bbblueSetState < matlab.System ...
         & matlab.system.mixin.internal.CustomIcon ...
         & matlab.system.mixin.Propagates ...
-        &  matlabshared.svd.BlockSampleTime ...
         & coder.ExternalDependency
 
-    % Beaglebone Blue Barometer
-    % We suggest using the highest oversampling possible for the rate at
-    % which you intend to sample the sensor. For example, if you want to
-    % sample and filter the data at 100hz, use 4x oversampling.
+    % Beaglebone Blue rc_set_state
 
     %#codegen
     %#ok<*EMCA>
 
     properties(Nontunable)
-        oversample = 'x1'; % oversample rate x1 with 182 Hz update rate
-        filter = 'BMP_FILTER_16'; % smoothest filter coefficient
+        state = 'UNINITIALIZED'; % oversample rate x1 with 182 Hz update rate
     end
 
     properties(Constant, Hidden)
-        oversampleSet = matlab.system.StringSet({'x1','x2','x4','x8','x16'})
-        filterSet = matlab.system.StringSet({'BMP_FILTER_OFF','BMP_FILTER_2','BMP_FILTER_4','BMP_FILTER_8','BMP_FILTER_16'})
+        stateSet = matlab.system.StringSet({'UNINITIALIZED','RUNNING','PAUSED','EXITING'})
         blockPlatform = 'BB BLUE'
     end
 
     properties(Hidden)
-        oversampleEnum
-        filterEnum
+        stateEnum
     end
 
     methods
         % Constructor
-        function obj = fccr_bbblueBarometer(varargin)
+        function obj = fccr_bbblueSetState(varargin)
             %This would allow the code generation to proceed with the
             %p-files in the installed location of the support package.
             coder.allowpcode('plain');
@@ -38,33 +31,16 @@ classdef fccr_bbblueBarometer < matlab.System ...
             setProperties(obj,nargin,varargin{:});
         end
 
-        function oversampleVal = get.oversampleEnum(obj)
-            switch(obj.oversample)
-                case 'x1'
-                    oversampleVal = uint8(1); % update rate 182 HZ
-                case 'x2'
-                    oversampleVal = uint8(2); % update rate 133 HZ
-                case 'x4'
-                    oversampleVal = uint8(3); % update rate 87 HZ
-                case 'x8'
-                    oversampleVal = uint8(4); % update rate 51 HZ
-                case 'x16'
-                    oversampleVal = uint8(5); % update rate 28 HZ
-            end
-        end
-
-        function filterVal = get.filterEnum(obj) % first order filter coefficient
-            switch(obj.filter)
-                case 'BMP_FILTER_OFF'
-                    filterVal = uint8(0);
-                case 'BMP_FILTER_2'
-                    filterVal = uint8(1);
-                case 'BMP_FILTER_4'
-                    filterVal = uint8(2);
-                case 'BMP_FILTER_8'
-                    filterVal = uint8(3);
-                case 'BMP_FILTER_16'
-                    filterVal = uint8(4);
+        function stateVal = get.stateEnum(obj)
+            switch(obj.state)
+                case 'UNINITIALIZED'
+                    stateVal = uint8(0); % update rate 182 HZ
+                case 'RUNNING'
+                    stateVal = uint8(1); % update rate 133 HZ
+                case 'PAUSED'
+                    stateVal = uint8(2); % update rate 87 HZ
+                case 'EXITING'
+                    stateVal = uint8(3); % update rate 51 HZ
             end
         end
 
@@ -76,28 +52,21 @@ classdef fccr_bbblueBarometer < matlab.System ...
             if coder.target('Rtw')
                 coder.cinclude('fccr_bbblue_driver.h');
                 coder.updateBuildInfo('addDefines','_roboticscape_in_use_');
-                coder.ceval('rc_initialize_barometer', obj.oversampleEnum, obj.filterEnum)
             end
         end
 
-        function [temp, pres, alt] = stepImpl(~)
+        function [~] = stepImpl(obj)
             % Implement algorithm. Calculate y as a function of input u and
             %  discrete states.
-            temp = double(0);
-            pres = double(0);
-            alt  = double(0);
             if coder.target('Rtw')
-                coder.ceval('rc_read_barometer');
-                temp = coder.ceval('rc_bmp_get_temperature');
-                pres = coder.ceval('rc_bmp_get_pressure_pa');
-                alt  = coder.ceval('rc_bmp_get_altitude_m');
+                coder.ceval('fccr_set_state',obj.stateEnum);
             end
         end
 
         function releaseImpl(~)
             % Release resources, such as file handles
             if coder.target('Rtw')
-                coder.ceval('rc_power_off_barometer');
+                coder.ceval('rc_set_state',uint8(3));
             end
         end
 
@@ -221,15 +190,9 @@ classdef fccr_bbblueBarometer < matlab.System ...
 
         function groups = getPropertyGroupsImpl
             % Oversample
-            Oversample = matlab.system.display.internal.Property('oversample', 'Description', 'Oversample');
-            % Filter
-            Filter = matlab.system.display.internal.Property('filter', 'Description', 'Filter');
+            State = matlab.system.display.internal.Property('state', 'Description', 'State');
 
-            % Sample Time
-            Sampletime = matlab.system.display.internal.Property('SampleTime', 'Description', 'Sample time');
-
-
-            PropertyListOut = {Oversample, Filter, Sampletime};
+            PropertyListOut = {State};
             % Create mask display
             Group = matlab.system.display.Section(...
                 'PropertyList',PropertyListOut);

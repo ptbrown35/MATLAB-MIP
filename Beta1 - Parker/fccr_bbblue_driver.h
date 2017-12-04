@@ -3,8 +3,6 @@
 #ifndef FCCR_DRIVER_BBBLUE_H
 #define FCCR_DRIVER_BBBLUE_H
 
-
-
 #if ( defined(MATLAB_MEX_FILE) || defined(RSIM_PARAMETER_LOADING) ||  defined(RSIM_WITH_SL_SOLVER) )
 /* This will be run in Rapid Accelerator Mode */
 
@@ -50,6 +48,5 @@ extern float rc_bmp_get_pressure_pa();
 extern float rc_bmp_get_altitude_m();
 
 #endif
-
 
 #endif

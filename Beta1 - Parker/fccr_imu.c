@@ -6,6 +6,7 @@
 *******************************************************************************/
 
 #include "MW_bbblue_driver.h"
+#include "fccr_bbblue_driver.h"
 
 rc_imu_data_t data; //struct to hold new data
 rc_imu_config_t conf;
