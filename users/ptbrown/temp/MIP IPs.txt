@@ -1,4 +1,0 @@
-100.80.245.193
-
-Default BBB USB login: 192.168.7.2
-Default BB Blue IP: 192.168.7.2
