@@ -11,11 +11,13 @@
 * Raw IMU Data: 3-axis acceleration, 3-axis gyro
 
 ### Example Simulations: beta/test_models
-* Template (template.slx): good starting point for new MATLAB MIP simulations
+* MIP Math Model (mip_model.slx): Successive Loop Closure example with MIP theoretical plants and controllers
+* Template (template.slx): good starting point for new MATLAB MIP hardware simulations
 * Barometer Test (barometer_test.slx): returns raw pressure, temperature, altitude
-* IMU test (imu_test.slx): returns raw 3-axis acceleration, 3-axis gyro
+* IMU Test (imu_test.slx): returns raw 3-axis acceleration, 3-axis gyro
 * Complimentary Filter (complimentary_filter.slx): returns body tilt angle from filtered accel/gyro data
-* MIP Balancing (mip_balance.slx): MIP balancing with user defined controllers
+* Barebones MIP Balancing (mip_balance.slx): MIP balancing with user defined controllers
+* User Friendly MIP Balancing (mip_balance_resets.slx): MIP balancing with start, upright, and tip conditions
 
 ### Resources
 * [Robotics Cape User Manual](http://strawsondesign.com/#!manual-install)
