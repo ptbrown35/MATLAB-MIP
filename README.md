@@ -1,61 +1,24 @@
 # MATLAB-MIP
-MATLAB controlled MIP
+### MATLAB controlled MIP
 
 ### Project Goals
 * Run eduMIP examples through MATLAB Simulink
 * Use Simulink's UI to simplify interfacing with the Robotics Cape
 * Make simple examples for blink and basic balancing
 
-### roboticscape.h functions
-**Wrapped**
-* rc_initialize
-* rc_set_led
-* rc_cleanup
+### Roboticscape Functionality
+* Raw Barometer Data: pressure, temperature, altitude
+* Raw IMU Data: 3-axis acceleration, 3-axis gyro
 
-**Need to be wrapped**
-* rc_get_state
-* rc_set_state
-* rc_get_led
-* rc_blink_led
-* rc_get_pause_button
-* rc_get_pause_button_state
-* rc_set_pause_pressed_func
-* rc_set_pause_released_func
-* rc_get_mode_button
-* rc_set_mode_pressed_func
-* rc_get_mode_buttom_state
-* rc_set_mode_released_func
-* rc_set_motor
-* rc_enable_motors
-* rc_disable_motors
-* rc_set_motor_free_spin
-* rc_set_motor_brake
-* rc_get_encoder_pos
-* rc_set_encoder_pos
-* rc_battery_voltage
-* rc_dc_jack_voltage
-* rc_adc_volt
-* rc_enable_servo_power_rail
-* rc_disable_servo_power_rail
-* rc_send_servo_pulse_us
-* rc_send_servo_pulse_normalized
-* rc_initialize_barometer
-* rc_read_barometer
-* rc_power_off_barometer
-* i2c, SPI, dsm, imu, uart
-
-**In Progress**
-* rc_initialize
-* rc_set_led
-* rc_cleanup
-* rc_get_state
-* rc_set_state
-* rc_get_led
-* rc_blink_led
-* rc_initialize_barometer
-* rc_read_barometer
-* rc_power_off_barometer
+### Example Simulations: beta/test_models
+* Template (template.slx): good starting point for new MATLAB MIP simulations
+* Barometer Test (barometer_test.slx): returns raw pressure, temperature, altitude
+* IMU test (imu_test.slx): returns raw 3-axis acceleration, 3-axis gyro
+* Complimentary Filter (complimentary_filter.slx): returns body tilt angle from filtered accel/gyro data
+* MIP Balancing (mip_balance.slx): MIP balancing with user defined controllers
 
 ### Resources
-* Robotics Cape Installer: https://github.com/StrawsonDesign/Robotics_Cape_Installer/releases
-* Labview MIP: https://github.com/ktalke12/Labview-MiP
+* [Robotics Cape User Manual](http://strawsondesign.com/#!manual-install)
+* [Robotics Cape Installer](https://github.com/StrawsonDesign/Robotics_Cape_Installer/releases)
+* [Simulink Coder Support Package for BeagleBone Blue Hardware](https://www.mathworks.com/matlabcentral/fileexchange/64925-simulink-coder-support-package-for-beaglebone-blue-hardware)
+* [Labview MIP](https://github.com/ktalke12/Labview-MiP)
